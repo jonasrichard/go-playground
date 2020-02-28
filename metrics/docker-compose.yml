@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+    influx:
+        image: influxdb
+        ports:
+            - 8083:8083
+            - 8086:8086
+            - 8089:8089
+        volumes:
+            - ./docker/influx.conf:/etc/influxdb/influxdb.conf:ro
+            - ./docker/influx-data:/var/lib/influxdb
+        environment:
+            INFLUXDB_ADMIN_ENABLED: "true"
+
+    grafana:
+        image: grafana/grafana
+        ports:
+            - 3000:3000
+        volumes:
+            - ./docker/grafana/:/etc/grafana/provisioning/
+        environment:
+            GF_SECURITY_ADMIN_PASSWORD: admin
