@@ -5,13 +5,21 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"runtime/pprof"
 
 	"github.com/rcrowley/go-metrics"
 	"github.com/vrischmann/go-metrics-influxdb"
 )
 
 func main() {
+	f, _ := os.Create("cpu.prof")
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
 	go processOne()
 
 	go metrics.Log(metrics.DefaultRegistry, 2*time.Second, log.New(os.Stderr, "metrics: ", log.Lmicroseconds))
@@ -27,8 +35,9 @@ func main() {
 		make(map[string]string, 0),
 		true)
 
-	for {
-	}
+	ch := make(chan os.Signal, 2)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+	<-ch
 }
 
 func processOne() {
