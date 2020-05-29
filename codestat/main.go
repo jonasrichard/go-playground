@@ -8,6 +8,8 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+
+	"github.com/lucasepe/color"
 )
 
 type SourceInfo struct {
@@ -16,34 +18,65 @@ type SourceInfo struct {
 	Size      int64
 }
 
+type GroupInfo struct {
+	Name  string
+	Lines int
+	Size  int64
+}
+
 /*
   TODO
     - order by lines, name, size (asc desc)
-    - coloring
-    - intelligent ext filter (all mode)
     - skip binary files
 */
 
 var result map[string]SourceInfo = make(map[string]SourceInfo)
 
 func main() {
+	filetypes := extensions()
+
 	err := filepath.Walk(".", walker)
 	if err != nil {
 		panic(err)
 	}
 
-	values := make([]SourceInfo, 0, len(result))
+	groups := make(map[string]GroupInfo)
+
 	for _, info := range result {
+		ft, ok := filetypes[info.Extension]
+		if !ok {
+			ft = "Unknown"
+		}
+
+		group, ok := groups[ft]
+		if !ok {
+			group = GroupInfo{Name: ft}
+		}
+
+		group.Lines += info.Lines
+		group.Size += info.Size
+
+		groups[ft] = group
+	}
+
+	values := make([]GroupInfo, 0)
+	for _, info := range groups {
 		values = append(values, info)
 	}
 
 	sort.Slice(values, func(i, j int) bool { return values[i].Lines > values[j].Lines })
 
-	fmt.Println("Extension     Lines       Size")
+	color.Cyan("Extension     Lines       Size\n")
 
 	for i := range values {
 		info := values[i]
-		fmt.Printf("%10s   %6d   %8d\n", info.Extension, info.Lines, info.Size)
+		msg := fmt.Sprintf("%10s   %6d   %8d\n", info.Name, info.Lines, info.Size)
+
+		if info.Name == "Unknown" {
+			color.Red(msg)
+		} else {
+			color.Green(msg)
+		}
 	}
 }
 
@@ -101,4 +134,31 @@ func lineCount(file string) (int, error) {
 
 		lines++
 	}
+}
+
+func extensions() map[string]string {
+	var filetypes = []struct {
+		name string
+		exts []string
+	}{
+		{"C", []string{".c", ".cc", ".h"}},
+		{"Config", []string{".conf", ".yml", ".yaml"}},
+		{"Go", []string{".go"}},
+		{"HTML", []string{".html", ".css"}},
+		{"Javascript", []string{".js"}},
+		{"JSON", []string{".json"}},
+		{"Ruby", []string{".rb", ".gemspec", ".rake", ".ru"}},
+		{"Rust", []string{".rs"}},
+		{"SQL", []string{".sql"}},
+	}
+
+	var result = make(map[string]string)
+
+	for _, filetype := range filetypes {
+		for _, ext := range filetype.exts {
+			result[ext] = filetype.name
+		}
+	}
+
+	return result
 }
