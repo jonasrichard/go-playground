@@ -44,9 +44,9 @@ type Consumer struct {
 	Input            chan interface{}
 	Sender           chan interface{}
 	Ask              chan EventAskRequest
-	ConsumerFinished chan bool
+	ConsumerFinished chan PartitionID
 	SenderReady      chan bool
-	SenderFinished   chan bool
+	SenderFinished   chan PartitionID
 }
 
 type Partitions map[PartitionID]Consumer
@@ -58,7 +58,7 @@ type Output interface {
 type NoOp struct {
 }
 
-const partitionCount PartitionID = 16
+const partitionCount int = 16
 
 //var NotFound = errors.New("not found")
 
@@ -163,14 +163,14 @@ func (o *NoOp) Send(data interface{}) {
 	time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
 }
 
-func send(input chan interface{}, senderReady chan bool, senderFinished chan bool, output Output) {
-	for item := range input {
+func send(consumer Consumer, output Output) {
+	for item := range consumer.Sender {
 		log.Infof("Finished %v", item)
 		output.Send(item)
-		senderReady <- true
+		consumer.SenderReady <- true
 	}
 
-	senderFinished <- true
+	consumer.SenderFinished <- consumer.PartitionID
 }
 
 var dirtyMu sync.Mutex
@@ -222,7 +222,7 @@ loop:
 		select {
 		case item, ok := <-consumer.Input:
 			if !ok {
-				log.Infof("%d emptying queue %v", consumer.PartitionID, consumer.Queue)
+				log.Infof("[%2d] Emptying queue %v", consumer.PartitionID, consumer.Queue)
 
 				for q := range consumer.Queue {
 					consumer.Sender <- q
@@ -265,15 +265,19 @@ loop:
 		}
 	}
 
-	log.Infof("Closing sender #%d", consumer.PartitionID)
+	log.Infof("[%2d] Closing sender", consumer.PartitionID)
 
 	close(consumer.Sender)
 
-	consumer.ConsumerFinished <- true
+	consumer.ConsumerFinished <- consumer.PartitionID
 }
 
 func router(partitions Partitions, input chan interface{}, ready chan bool, output Output) {
-	var i PartitionID
+	var (
+		i                int
+		consumerFinished = make(chan PartitionID)
+		senderFinished   = make(chan PartitionID)
+	)
 
 	for i = 0; i < partitionCount; i++ {
 		consumer := Consumer{
@@ -282,15 +286,15 @@ func router(partitions Partitions, input chan interface{}, ready chan bool, outp
 			Input:            make(chan interface{}),
 			Sender:           make(chan interface{}),
 			Ask:              make(chan EventAskRequest),
-			ConsumerFinished: make(chan bool),
+			ConsumerFinished: consumerFinished,
 			SenderReady:      make(chan bool),
-			SenderFinished:   make(chan bool),
+			SenderFinished:   senderFinished,
 		}
 
-		partitions[i] = consumer
+		partitions[PartitionID(i)] = consumer
 
 		go consume(consumer)
-		go send(consumer.Sender, consumer.SenderReady, consumer.SenderFinished, output)
+		go send(consumer, output)
 	}
 
 	for item := range input {
@@ -299,9 +303,9 @@ func router(partitions Partitions, input chan interface{}, ready chan bool, outp
 		var partitionID PartitionID
 		switch i := item.(type) {
 		case Event:
-			partitionID = PartitionID(i.ID) % partitionCount
+			partitionID = PartitionID(i.ID) % PartitionID(partitionCount)
 		case Market:
-			partitionID = PartitionID(i.EventID) % partitionCount
+			partitionID = PartitionID(i.EventID) % PartitionID(partitionCount)
 		}
 
 		partitions[partitionID].Input <- item
@@ -313,9 +317,19 @@ func router(partitions Partitions, input chan interface{}, ready chan bool, outp
 		close(partitions[i].Input)
 	}
 
-	for i := range partitions {
-		<-partitions[i].ConsumerFinished
-		<-partitions[i].SenderFinished
+	var finishedSenders, finishedConsumers int
+
+	for {
+		select {
+		case <-senderFinished:
+			finishedSenders++
+		case <-consumerFinished:
+			finishedConsumers++
+		}
+
+		if finishedConsumers == partitionCount && finishedSenders == partitionCount {
+			break
+		}
 	}
 
 	ready <- true
