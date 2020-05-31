@@ -19,17 +19,16 @@ func sleep(base int, variance int) {
 }
 
 func worker(partition int, data <-chan WorkItem) {
-	for {
-		select {
-		case item := <-data:
-			fmt.Printf("%v processing %v => %v\n", partition, item.Key, item.Value)
-			if partition == 0 {
-				sleep(10000, 10000)
-			} else {
-				sleep(500, 500)
-			}
-			fmt.Printf("%v finished with %v\n", partition, item.Key)
+    for item := range data {
+		fmt.Printf("%v processing %v => %v\n", partition, item.Key, item.Value)
+
+		if partition == 0 {
+			sleep(10000, 10000)
+		} else {
+			sleep(500, 500)
 		}
+
+		fmt.Printf("%v finished with %v\n", partition, item.Key)
 	}
 }
 

@@ -24,27 +24,25 @@ type WriteOp struct {
 }
 
 func StartKeyValueStore(input <-chan interface{}) {
-	var store map[int]string = make(map[int]string, 0)
+	var store = make(map[int]string)
 
 	for op := range input {
 		switch op.(type) {
 		case ReadOp:
-			readOp := op.(ReadOp)
-			fmt.Printf("Reading the value %v\n", readOp.key)
+			fmt.Printf("Reading the value %v\n", op.key)
 
-			value, ok := store[readOp.key]
+			value, ok := store[op.key]
 			if ok {
-				readOp.result <- Item{readOp.key, value}
+				op.result <- Item{op.key, value}
 			} else {
-				readOp.result <- Item{0, ""}
+				op.result <- Item{0, ""}
 			}
 		case WriteOp:
-			writeOp := op.(WriteOp)
-			fmt.Printf("Writing the item %v\n", writeOp.item)
+			fmt.Printf("Writing the item %v\n", op.item)
 
-			store[writeOp.item.key] = writeOp.item.value
+			store[op.item.key] = op.item.value
 
-			writeOp.result <- true
+			op.result <- true
 		default:
 			fmt.Printf("Unknown operation %v\n", op)
 		}
