@@ -22,22 +22,35 @@ type SubtitleItem struct {
 	Lines  []string
 }
 
+// TODO check if any time will be negative
+
 func main() {
 	input := flag.String("i", "", ".srt input file")
 	time1 := flag.String("t1", "", "simple delay in from->to format")
 	time2 := flag.String("t2", "", "interpolated delay in from->to format")
 	flag.Parse()
 
-	_, err := ReadSrtFile(*input)
+	subtitles, err := ReadSrtFile(*input)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	diff1 := parseFromToOpt(*time1)
+	fmt.Printf("Applying diff %dms\n", diff1)
 
-    if *time2 == "" {
-        fmt.Println(diff1)
-    }
+	if *time2 == "" {
+		fmt.Println(diff1)
+	}
+
+	for i := range subtitles {
+		fmt.Println(subtitles[i])
+		newFrom := convertTimeToString(convertStringToTime(subtitles[i].From) + diff1)
+		newTo := convertTimeToString(convertStringToTime(subtitles[i].To) + diff1)
+
+		subtitles[i].From = newFrom
+		subtitles[i].To = newTo
+		fmt.Println(subtitles[i])
+	}
 }
 
 func ReadSrtFile(name string) ([]SubtitleItem, error) {
@@ -48,8 +61,9 @@ func ReadSrtFile(name string) ([]SubtitleItem, error) {
 	defer file.Close()
 
 	var (
-		step int
-		item SubtitleItem
+		step      int
+		item      SubtitleItem
+		subtitles []SubtitleItem = make([]SubtitleItem, 0)
 	)
 
 	scanner := bufio.NewScanner(file)
@@ -74,6 +88,7 @@ func ReadSrtFile(name string) ([]SubtitleItem, error) {
 			if line != "" {
 				item.Lines = append(item.Lines, line)
 			} else {
+				subtitles = append(subtitles, item)
 				fmt.Println(item)
 				item = SubtitleItem{Lines: []string{}}
 				step = 0
@@ -85,14 +100,26 @@ func ReadSrtFile(name string) ([]SubtitleItem, error) {
 		return nil, err
 	}
 
-	return []SubtitleItem{}, nil
+	return subtitles, nil
 }
 
-func convertTime(s string) int {
+func convertStringToTime(s string) int {
 	var hour, minute, second, milli int
+
 	fmt.Sscanf(s, "%2d:%2d:%2d,%3d", &hour, &minute, &second, &milli)
 
 	return (((hour*60)+minute)*60+second)*1000 + milli
+}
+
+func convertTimeToString(t int) string {
+	milli := t % 1000
+	t /= 1000
+	second := t % 60
+	t /= 60
+	minute := t % 60
+	t /= 60
+
+	return fmt.Sprintf("%02d:%02d:%02d,%03d", t, minute, second, milli)
 }
 
 func parseFromToOpt(ftOpt string) int {
@@ -105,8 +132,5 @@ func parseFromToOpt(ftOpt string) int {
 	from := ftOpt[:p]
 	to := ftOpt[p+2:]
 
-	fmt.Printf("|%s|%s|\n", from, to)
-    fmt.Printf("%d %d\n", convertTime(from), convertTime(to))
-
-    return 0
+	return convertStringToTime(to) - convertStringToTime(from)
 }
