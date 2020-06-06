@@ -24,12 +24,20 @@ type SubtitleItem struct {
 
 func main() {
 	input := flag.String("i", "", ".srt input file")
+	time1 := flag.String("t1", "", "simple delay in from->to format")
+	time2 := flag.String("t2", "", "interpolated delay in from->to format")
 	flag.Parse()
 
 	_, err := ReadSrtFile(*input)
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	diff1 := parseFromToOpt(*time1)
+
+    if *time2 == "" {
+        fmt.Println(diff1)
+    }
 }
 
 func ReadSrtFile(name string) ([]SubtitleItem, error) {
@@ -78,4 +86,27 @@ func ReadSrtFile(name string) ([]SubtitleItem, error) {
 	}
 
 	return []SubtitleItem{}, nil
+}
+
+func convertTime(s string) int {
+	var hour, minute, second, milli int
+	fmt.Sscanf(s, "%2d:%2d:%2d,%3d", &hour, &minute, &second, &milli)
+
+	return (((hour*60)+minute)*60+second)*1000 + milli
+}
+
+func parseFromToOpt(ftOpt string) int {
+	p := strings.Index(ftOpt, "->")
+
+	if p == -1 {
+		return 0
+	}
+
+	from := ftOpt[:p]
+	to := ftOpt[p+2:]
+
+	fmt.Printf("|%s|%s|\n", from, to)
+    fmt.Printf("%d %d\n", convertTime(from), convertTime(to))
+
+    return 0
 }
