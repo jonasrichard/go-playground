@@ -51,6 +51,11 @@ func main() {
 		subtitles[i].To = newTo
 		fmt.Println(subtitles[i])
 	}
+
+    err = WriteSrtFile(subtitles, "out.srt")
+    if err != nil {
+		fmt.Println(err)
+    }
 }
 
 func ReadSrtFile(name string) ([]SubtitleItem, error) {
@@ -101,6 +106,27 @@ func ReadSrtFile(name string) ([]SubtitleItem, error) {
 	}
 
 	return subtitles, nil
+}
+
+func WriteSrtFile(subtitles []SubtitleItem, name string) error {
+    file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0755)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+
+    for _, item := range subtitles {
+        fmt.Fprintf(file, "%d\n", item.Number)
+        fmt.Fprintf(file, "%s --> %s\n", item.From, item.To)
+
+        for _, line := range item.Lines {
+            fmt.Fprintf(file, "%s\n", line)
+        }
+
+        fmt.Fprint(file, "\n")
+    }
+
+    return nil
 }
 
 func convertStringToTime(s string) int {
