@@ -23,7 +23,7 @@ func LoadEvent(id int) (Event, error) {
 	return Event{}, errors.New("Event not found")
 }
 
-func (e Event) ApplyEvents(events []eventstore.SourceableEvent) Event {
+func (e *Event) ApplyEvents(events []eventstore.SourceableEvent) {
 	for _, evt := range events {
 		switch evt := evt.(type) {
 		case event.CreateEventEvent:

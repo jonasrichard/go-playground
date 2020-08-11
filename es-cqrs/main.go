@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+// json schema for validating commands
 func main() {
 	cmd := command.CreateEventCommand{ID: 2, Name: "Man-Ars", Type: "Soccer"}
 
