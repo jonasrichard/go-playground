@@ -8,7 +8,7 @@ import (
 
 // json schema for validating commands
 func main() {
-	cmd := command.CreateEventCommand{ID: 2, Name: "Man-Ars", Type: "Soccer"}
+	cmd := command.CreateEventCommand{EventID: 2, Name: "Man-Ars", Type: "Soccer"}
 
 	event, _ := commandhandler.HandleCreateEventCommand(cmd)
 
