@@ -4,37 +4,35 @@ import (
 	"errors"
 	"es/command"
 	"es/store"
-	"fmt"
 )
 
 var ErrUnknownCommand = errors.New("unknown command")
 
-// Dynamic registration of handler funcs
-func Handle(c interface{}) (interface{}, error) {
-	var evt interface{}
-	var err error
-
-	switch cmd := c.(type) {
-	case command.CreateEventCommand:
-		evt, err = HandleCreateEventCommand(cmd)
-	case command.StartEventCommand:
-		evt, err = HandleStartEventCommand(cmd)
-	case command.CreateMarketCommand:
-		evt, err = HandleCreateMarketCommand(cmd)
-	}
-
-	fmt.Printf("Router %v %v\n", evt, err)
+func Handle(cmd interface{}) (interface{}, error) {
+	event, err := ExecuteCommand(cmd)
 
 	if err == nil {
-		event, ok := evt.(store.SourceableEvent)
-		if ok {
-			store.Store(event)
-
-			return evt, nil
-		}
-
-		return nil, ErrUnknownCommand
+		store.Store(event.(store.SourceableEvent))
 	}
 
-	return nil, err
+	return event, err
+}
+
+func ExecuteCommand(c interface{}) (store.SourceableEvent, error) {
+	switch cmd := c.(type) {
+	case command.CreateEventCommand:
+		return HandleCreateEventCommand(cmd)
+	case command.StartEventCommand:
+		return HandleStartEventCommand(cmd)
+	case command.SuspendEventCommand:
+		return HandleSuspendEventCommand(cmd)
+	case command.CloseEventCommand:
+		return HandleCloseEventCommand(cmd)
+	case command.CreateMarketCommand:
+		return HandleCreateMarketCommand(cmd)
+	case command.UpdatePriceCommand:
+		return HandleUpdatePriceCommand(cmd)
+	}
+
+	return nil, ErrUnknownCommand
 }

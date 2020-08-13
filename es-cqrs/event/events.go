@@ -9,17 +9,9 @@ type CreateEvent struct {
 	Timestamp time.Time
 }
 
-func (e CreateEvent) GetID() int {
-	return e.EventID
-}
-
 type StartEvent struct {
 	EventID   int
 	StartTime time.Time
-}
-
-func (e StartEvent) GetID() int {
-	return e.EventID
 }
 
 type SuspendEvent struct {
@@ -27,18 +19,10 @@ type SuspendEvent struct {
 	SuspendTime time.Time
 }
 
-func (e SuspendEvent) GetID() int {
-	return e.EventID
-}
-
 type CloseEvent struct {
 	EventID   int
 	CloseTime time.Time
 	// Resulting?
-}
-
-func (e CloseEvent) GetID() int {
-	return e.EventID
 }
 
 type CreateMarket struct {
@@ -53,16 +37,32 @@ type CreateMarket struct {
 	Timestamp time.Time
 }
 
-func (e CreateMarket) GetID() int {
-	return e.EventID
-}
-
 type UpdatePrice struct {
 	EventID   int
 	MarketID  int
 	OutcomeID int
 	Price     float32
 	Timestamp time.Time
+}
+
+func (e CreateEvent) GetID() int {
+	return e.EventID
+}
+
+func (e StartEvent) GetID() int {
+	return e.EventID
+}
+
+func (e SuspendEvent) GetID() int {
+	return e.EventID
+}
+
+func (e CloseEvent) GetID() int {
+	return e.EventID
+}
+
+func (e CreateMarket) GetID() int {
+	return e.EventID
 }
 
 func (e UpdatePrice) GetID() int {
