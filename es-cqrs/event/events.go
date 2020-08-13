@@ -25,15 +25,17 @@ type CloseEvent struct {
 	// Resulting?
 }
 
+type CreateMarketOutcome struct {
+	ID            int
+	Name          string
+	StartingPrice float64
+}
+
 type CreateMarket struct {
-	EventID  int
-	MarketID int
-	Name     string
-	Outcomes []struct {
-		ID            int
-		Name          string
-		StartingPrice float32
-	}
+	EventID   int
+	MarketID  int
+	Name      string
+	Outcomes  []CreateMarketOutcome
 	Timestamp time.Time
 }
 
@@ -41,7 +43,7 @@ type UpdatePrice struct {
 	EventID   int
 	MarketID  int
 	OutcomeID int
-	Price     float32
+	Price     float64
 	Timestamp time.Time
 }
 

@@ -3,6 +3,7 @@ package commandhandler
 import (
 	"errors"
 	"es/command"
+	"es/projection"
 	"es/store"
 )
 
@@ -35,4 +36,9 @@ func ExecuteCommand(c interface{}) (store.SourceableEvent, error) {
 	}
 
 	return nil, ErrUnknownCommand
+}
+
+func EventBus(event store.SourceableEvent) error {
+	// TODO loop
+	return projection.ProjectActiveEventPrice(event)
 }

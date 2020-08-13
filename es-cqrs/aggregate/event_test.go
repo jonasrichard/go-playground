@@ -42,14 +42,10 @@ func TestStartEvent(t *testing.T) {
 func TestCreateMarket(t *testing.T) {
 	events := []store.SourceableEvent{
 		event.CreateEvent{EventID: 6, Name: "Deb-Man", Type: "Soccer"},
-		event.CreateMarket{EventID: 6, MarketID: 2, Name: "Win-Draw-Win", Outcomes: []struct {
-			ID            int
-			Name          string
-			StartingPrice float32
-		}{
-			{1, "Home team", 1.4},
-			{2, "Away team", 5.4},
-			{3, "Draw", 2.7},
+		event.CreateMarket{EventID: 6, MarketID: 2, Name: "Win-Draw-Win", Outcomes: []event.CreateMarketOutcome{
+			{ID: 1, Name: "Home team", StartingPrice: 1.4},
+			{ID: 2, Name: "Away team", StartingPrice: 5.4},
+			{ID: 3, Name: "Draw", StartingPrice: 2.7},
 		}},
 	}
 

@@ -20,7 +20,7 @@ const (
 type Outcome struct {
 	ID    int
 	Name  string
-	Price float32
+	Price float64
 }
 
 type Market struct {

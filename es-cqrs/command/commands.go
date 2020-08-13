@@ -18,20 +18,27 @@ type CloseEventCommand struct {
 	EventID int
 }
 
+type CreateMarketOutcome struct {
+	ID            int
+	Name          string
+	StartingPrice float64
+}
+
 type CreateMarketCommand struct {
 	EventID  int
 	MarketID int
 	Name     string
-	Outcomes []struct {
-		ID            int
-		Name          string
-		StartingPrice float32
-	}
+	Outcomes []CreateMarketOutcome
+}
+
+type SuspendMarketCommand struct {
+	EventID  int
+	MarketID int
 }
 
 type UpdatePriceCommand struct {
 	EventID   int
 	MarketID  int
 	OutcomeID int
-	Price     float32
+	Price     float64
 }
