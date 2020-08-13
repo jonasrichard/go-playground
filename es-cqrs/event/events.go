@@ -25,6 +25,7 @@ type CloseEvent struct {
 	// Resulting?
 }
 
+// helper struct for create market
 type CreateMarketOutcome struct {
 	ID            int
 	Name          string

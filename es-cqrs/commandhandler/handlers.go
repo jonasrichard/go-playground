@@ -12,6 +12,7 @@ var ErrEventAlreadyCreated = errors.New("event exists with that ID")
 var ErrEventAlreadyStarted = errors.New("event cannot be started")
 var ErrEventAlreadySuspended = errors.New("event cannot be suspended")
 var ErrEventAlreadyClosed = errors.New("event cannot be closed")
+var ErrEventNotFound = errors.New("event not found")
 
 func HandleCreateEventCommand(cmd command.CreateEventCommand) (event.CreateEvent, error) {
 	_, err := aggregate.LoadEvent(cmd.EventID)
@@ -82,10 +83,33 @@ func HandleCloseEventCommand(cmd command.CloseEventCommand) (event.CloseEvent, e
 }
 
 func HandleCreateMarketCommand(cmd command.CreateMarketCommand) (event.CreateMarket, error) {
-	// find event by id
-	// if event is closed we cannot create markets
+	_, err := aggregate.LoadEvent(cmd.EventID)
 
-	return event.CreateMarket{}, nil
+	if err == nil {
+		outcomes := []event.CreateMarketOutcome{}
+
+		for _, o := range cmd.Outcomes {
+			outcome := event.CreateMarketOutcome{
+				ID:            o.ID,
+				Name:          o.Name,
+				StartingPrice: o.StartingPrice,
+			}
+
+			outcomes = append(outcomes, outcome)
+		}
+
+		createMarket := event.CreateMarket{
+			EventID:   cmd.EventID,
+			MarketID:  cmd.MarketID,
+			Name:      cmd.Name,
+			Outcomes:  outcomes,
+			Timestamp: time.Now(),
+		}
+
+		return createMarket, nil
+	}
+
+	return event.CreateMarket{}, ErrEventNotFound
 }
 
 func HandleUpdatePriceCommand(cmd command.UpdatePriceCommand) (event.UpdatePrice, error) {
