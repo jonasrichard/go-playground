@@ -3,6 +3,7 @@ package main
 import (
 	"es/projection"
 	"es/shell"
+	"time"
 
 	"github.com/abiosoft/ishell"
 )
@@ -25,6 +26,7 @@ func main() {
 
 	RegisterCmd("create_event", "<event id> <name> <sport>", shell.CreateEvent)
 	RegisterCmd("start_event", "<event id>", shell.StartEvent)
+	RegisterCmd("print_active_events", "List active events", PrintActiveEvents)
 
 	RegisterCmd(
 		"create_market",
@@ -46,6 +48,12 @@ func main() {
 
 func PrintPrices(c *ishell.Context) {
 	for _, p := range projection.ActiveEventPriceView {
-		c.Printf("%5d %5d %5d %10f %20s\n", p.EventID, p.MarketID, p.OutcomeID, p.Price, p.ValidFrom)
+		c.Printf("%5d %5d %5d %10f %20s\n", p.EventID, p.MarketID, p.OutcomeID, p.Price, p.ValidFrom.Format(time.RFC3339))
+	}
+}
+
+func PrintActiveEvents(c *ishell.Context) {
+	for _, e := range projection.ActiveEvents {
+		c.Printf("%5d %20s %s\n", e.ID, e.Name, e.StartTime.Format(time.RFC3339))
 	}
 }

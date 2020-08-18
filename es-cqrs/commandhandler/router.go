@@ -40,5 +40,8 @@ func ExecuteCommand(c interface{}) (store.SourceableEvent, error) {
 
 func EventBus(event store.SourceableEvent) error {
 	// TODO loop
-	return projection.ProjectActiveEventPrice(event)
+	projection.ProjectActiveEventPrice(event)
+	projection.ProjectActiveEvents(event)
+
+	return nil
 }
