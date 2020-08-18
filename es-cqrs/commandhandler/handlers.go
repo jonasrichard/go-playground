@@ -35,16 +35,17 @@ func HandleCreateEventCommand(cmd command.CreateEventCommand) (event.CreateEvent
 func HandleStartEventCommand(cmd command.StartEventCommand) (event.StartEvent, error) {
 	var result event.StartEvent
 
-	eventAggregate, err := aggregate.LoadEvent(cmd.EventID)
+	evt, err := aggregate.LoadEvent(cmd.EventID)
 
 	if err != nil {
 		return result, err
 	}
 
-	if eventAggregate.State == aggregate.PreGame {
+	if evt.State == aggregate.PreGame {
 		startEvent := event.StartEvent{
 			EventID:   cmd.EventID,
 			StartTime: time.Now(),
+			Name:      evt.Name,
 		}
 
 		return startEvent, nil

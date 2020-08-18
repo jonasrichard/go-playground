@@ -12,6 +12,7 @@ type CreateEvent struct {
 type StartEvent struct {
 	EventID   int
 	StartTime time.Time
+	Name      string
 }
 
 type SuspendEvent struct {

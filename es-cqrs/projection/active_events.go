@@ -19,7 +19,7 @@ func ProjectActiveEvents(evt store.SourceableEvent) error {
 	case event.StartEvent:
 		ae := ActiveEvent{
 			ID:        e.EventID,
-			Name:      "", // event enrichment we need
+			Name:      e.Name,
 			StartTime: e.StartTime,
 		}
 

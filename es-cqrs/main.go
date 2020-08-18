@@ -3,6 +3,7 @@ package main
 import (
 	"es/projection"
 	"es/shell"
+	"fmt"
 	"time"
 
 	"github.com/abiosoft/ishell"
@@ -22,10 +23,12 @@ func RegisterCmd(name string, help string, handler func(*ishell.Context)) {
 func main() {
 	sh = ishell.New()
 
-	sh.Println("Event Sourcing shell")
+	sh.Println(shell.Green("Event Sourcing shell"))
 
 	RegisterCmd("create_event", "<event id> <name> <sport>", shell.CreateEvent)
 	RegisterCmd("start_event", "<event id>", shell.StartEvent)
+	RegisterCmd("suspend_event", "<event id>", shell.SuspendEvent)
+	RegisterCmd("close_event", "<event id>", shell.CloseEvent)
 	RegisterCmd("print_active_events", "List active events", PrintActiveEvents)
 
 	RegisterCmd(
@@ -47,12 +50,16 @@ func main() {
 }
 
 func PrintPrices(c *ishell.Context) {
+	c.Println(shell.Yellow(fmt.Sprintf("%5s %5s %5s %10s %20s", "Event", "Mkt", "Outcome", "Price", "Valid from")))
+
 	for _, p := range projection.ActiveEventPriceView {
 		c.Printf("%5d %5d %5d %10f %20s\n", p.EventID, p.MarketID, p.OutcomeID, p.Price, p.ValidFrom.Format(time.RFC3339))
 	}
 }
 
 func PrintActiveEvents(c *ishell.Context) {
+	c.Println(shell.Yellow(fmt.Sprintf("%5s %20s %s", "Event", "Name", "Start time")))
+
 	for _, e := range projection.ActiveEvents {
 		c.Printf("%5d %20s %s\n", e.ID, e.Name, e.StartTime.Format(time.RFC3339))
 	}

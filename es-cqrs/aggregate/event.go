@@ -6,6 +6,8 @@ import (
 	"es/store"
 	"fmt"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 type EventState int
@@ -41,6 +43,7 @@ type Event struct {
 }
 
 var ErrNotFound = errors.New("Event record not found")
+var Yellow = color.New(color.FgYellow)
 
 func LoadEvent(id int) (*Event, error) {
 	events := store.Get(id)
@@ -57,7 +60,8 @@ func LoadEvent(id int) (*Event, error) {
 
 func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 	for _, evt := range events {
-		fmt.Printf("[Aggregate] Applying %T %v\n", evt, evt)
+		Yellow.Print("[Aggregate]")
+		fmt.Printf(" Applying %T %v\n", evt, evt)
 
 		switch evt := evt.(type) {
 		case event.CreateEvent:
@@ -103,5 +107,6 @@ func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 		}
 	}
 
-	fmt.Printf("[Aggregate] After applies %v\n", e)
+	Yellow.Print("[Aggregate]")
+	fmt.Printf(" After applies %v\n", e)
 }

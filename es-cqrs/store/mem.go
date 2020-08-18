@@ -1,12 +1,17 @@
 package store
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/fatih/color"
+)
 
 type SourceableEvent interface {
 	GetID() int
 }
 
 var mem map[int][]SourceableEvent = make(map[int][]SourceableEvent)
+var magenta = color.New(color.FgMagenta)
 
 func Store(event SourceableEvent) {
 	id := event.GetID()
@@ -18,7 +23,8 @@ func Store(event SourceableEvent) {
 		events = append(events, event)
 	}
 
-	fmt.Printf("[Store] Store event %d -> %v\n", id, event)
+	magenta.Print("[Store]")
+	fmt.Printf(" Store event %d -> %v\n", id, event)
 
 	mem[id] = events
 }

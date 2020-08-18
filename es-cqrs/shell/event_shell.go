@@ -8,7 +8,12 @@ import (
 	"strconv"
 
 	"github.com/abiosoft/ishell"
+	"github.com/lucasepe/color"
 )
+
+var Green = color.New(color.FgGreen).SprintFunc()
+var Yellow = color.New(color.FgYellow).SprintFunc()
+var Red = color.New(color.FgRed).SprintFunc()
 
 func SimpleHandler(command interface{}) {
 	fmt.Printf("[repl] %v\n", command)
@@ -43,6 +48,20 @@ func CreateEvent(c *ishell.Context) {
 func StartEvent(c *ishell.Context) {
 	eventID := ToID(c.Args[0])
 	cmd := command.StartEventCommand{EventID: eventID}
+
+	SimpleHandler(cmd)
+}
+
+func SuspendEvent(c *ishell.Context) {
+	eventID := ToID(c.Args[0])
+	cmd := command.SuspendEventCommand{EventID: eventID}
+
+	SimpleHandler(cmd)
+}
+
+func CloseEvent(c *ishell.Context) {
+	eventID := ToID(c.Args[0])
+	cmd := command.CloseEventCommand{EventID: eventID}
 
 	SimpleHandler(cmd)
 }
