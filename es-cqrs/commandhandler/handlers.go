@@ -13,6 +13,7 @@ var ErrEventAlreadyStarted = errors.New("event cannot be started")
 var ErrEventAlreadySuspended = errors.New("event cannot be suspended")
 var ErrEventAlreadyClosed = errors.New("event cannot be closed")
 var ErrEventNotFound = errors.New("event not found")
+var ErrCannotChangePrice = errors.New("cannot change price")
 
 func HandleCreateEventCommand(cmd command.CreateEventCommand) (event.CreateEvent, error) {
 	_, err := aggregate.LoadEvent(cmd.EventID)
@@ -113,9 +114,19 @@ func HandleCreateMarketCommand(cmd command.CreateMarketCommand) (event.CreateMar
 }
 
 func HandleUpdatePriceCommand(cmd command.UpdatePriceCommand) (event.UpdatePrice, error) {
-	// look for the event by outcome id
-	// if event is close we cannot modify prices
-	// NOTE: we need to do it in a projection
+	evt, _ := aggregate.LoadEvent(cmd.EventID)
 
-	return event.UpdatePrice{}, nil
+	if evt.State != aggregate.Closed {
+		updatePrice := event.UpdatePrice{
+			EventID:   cmd.EventID,
+			MarketID:  cmd.MarketID,
+			OutcomeID: cmd.OutcomeID,
+			Price:     cmd.Price,
+			Timestamp: time.Now(),
+		}
+
+		return updatePrice, nil
+	}
+
+	return event.UpdatePrice{}, ErrCannotChangePrice
 }

@@ -1,102 +1,51 @@
 package main
 
 import (
-	"es/command"
-	"es/commandhandler"
 	"es/projection"
-	"es/store"
-	"fmt"
-	"strconv"
+	"es/shell"
 
 	"github.com/abiosoft/ishell"
 )
 
-func SimpleHandler(command interface{}) error {
-	fmt.Printf("[repl] %v\n", command)
+var sh *ishell.Shell
 
-	event, err := commandhandler.Handle(command)
-
-	if err == nil {
-		fmt.Printf("[repl] Event: %v\n", event)
-
-		return commandhandler.EventBus(event.(store.SourceableEvent))
-	}
-
-	fmt.Printf("[repl] Error %v\n", err)
-
-	return err
+func RegisterCmd(name string, help string, handler func(*ishell.Context)) {
+	sh.AddCmd(&ishell.Cmd{
+		Name: name,
+		Help: help,
+		Func: handler,
+	})
 }
 
 // json schema for validating commands
 func main() {
-	shell := ishell.New()
+	sh = ishell.New()
 
-	shell.Println("Event Sourcing shell")
+	sh.Println("Event Sourcing shell")
 
-	shell.AddCmd(&ishell.Cmd{
-		Name: "create_event",
-		Help: "Create event",
-		Func: func(c *ishell.Context) {
-			eventID, err := strconv.Atoi(c.Args[0])
-			if err != nil {
-				c.Println(err)
+	RegisterCmd("create_event", "<event id> <name> <sport>", shell.CreateEvent)
+	RegisterCmd("start_event", "<event id>", shell.StartEvent)
 
-				return
-			}
+	RegisterCmd(
+		"create_market",
+		"<event id> <market id> <name> [<outcome id> <outcome name> <starting price>]...",
+		shell.CreateMarket,
+	)
 
-			cmd := command.CreateEventCommand{EventID: eventID, Name: c.Args[1], Type: c.Args[2]}
+	RegisterCmd("update_price", "<event id> <market id> <outcome id> <price>", shell.UpdatePrice)
+	RegisterCmd("print_prices", "Print prices of active events", PrintPrices)
 
-			if err := SimpleHandler(cmd); err != nil {
-				c.Println(err)
-			}
-		},
-	})
+	sh.Process("create_event", "1", "Man-Ars", "soccer")
+	sh.Process("create_market", "1", "1", "Win-Draw-Win",
+		"1", "Home team", "1.4",
+		"2", "Draw", "2.8",
+		"3", "Away team", "3.7")
 
-	shell.AddCmd(&ishell.Cmd{
-		Name: "create_market",
-		Help: "Create market with outcomes",
-		Func: func(c *ishell.Context) {
-			eventID, _ := strconv.Atoi(c.Args[0])
-			marketID, _ := strconv.Atoi(c.Args[1])
+	sh.Run()
+}
 
-			outcomes := []command.CreateMarketOutcome{}
-			i := 3
-			for {
-				if i >= len(c.Args) {
-					break
-				}
-
-				outcomeID, _ := strconv.Atoi(c.Args[i])
-				price, _ := strconv.ParseFloat(c.Args[i+2], 64)
-
-				outcome := command.CreateMarketOutcome{ID: outcomeID, Name: c.Args[i+1], StartingPrice: price}
-				outcomes = append(outcomes, outcome)
-
-				i += 3
-			}
-
-			cmd := command.CreateMarketCommand{
-				EventID:  eventID,
-				MarketID: marketID,
-				Name:     c.Args[2],
-				Outcomes: outcomes,
-			}
-
-			if err := SimpleHandler(cmd); err != nil {
-				c.Println(err)
-			}
-		},
-	})
-
-	shell.AddCmd(&ishell.Cmd{
-		Name: "print_prices",
-		Help: "Print prices of active events",
-		Func: func(c *ishell.Context) {
-			for _, p := range projection.ActiveEventPriceView {
-				c.Printf("%5d %5d %5d %10f %20s\n", p.EventID, p.MarketID, p.OutcomeID, p.Price, p.ValidFrom)
-			}
-		},
-	})
-
-	shell.Run()
+func PrintPrices(c *ishell.Context) {
+	for _, p := range projection.ActiveEventPriceView {
+		c.Printf("%5d %5d %5d %10f %20s\n", p.EventID, p.MarketID, p.OutcomeID, p.Price, p.ValidFrom)
+	}
 }
