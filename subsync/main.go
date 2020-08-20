@@ -23,6 +23,7 @@ type SubtitleItem struct {
 }
 
 // TODO check if any time will be negative
+// TODO support simple delay mode like -d 1500ms -d 1,5s
 
 func main() {
 	input := flag.String("i", "", ".srt input file")
@@ -52,10 +53,13 @@ func main() {
 		fmt.Println(subtitles[i])
 	}
 
-    err = WriteSrtFile(subtitles, "out.srt")
-    if err != nil {
+	p := strings.Index(*input, ".srt")
+	output := (*input)[:p] + fmt.Sprintf("%+dms", diff1) + ".srt"
+	err = WriteSrtFile(subtitles, output)
+
+	if err != nil {
 		fmt.Println(err)
-    }
+	}
 }
 
 func ReadSrtFile(name string) ([]SubtitleItem, error) {
@@ -109,24 +113,24 @@ func ReadSrtFile(name string) ([]SubtitleItem, error) {
 }
 
 func WriteSrtFile(subtitles []SubtitleItem, name string) error {
-    file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0755)
-    if err != nil {
-        return err
-    }
-    defer file.Close()
+	file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
-    for _, item := range subtitles {
-        fmt.Fprintf(file, "%d\n", item.Number)
-        fmt.Fprintf(file, "%s --> %s\n", item.From, item.To)
+	for _, item := range subtitles {
+		fmt.Fprintf(file, "%d\n", item.Number)
+		fmt.Fprintf(file, "%s --> %s\n", item.From, item.To)
 
-        for _, line := range item.Lines {
-            fmt.Fprintf(file, "%s\n", line)
-        }
+		for _, line := range item.Lines {
+			fmt.Fprintf(file, "%s\n", line)
+		}
 
-        fmt.Fprint(file, "\n")
-    }
+		fmt.Fprint(file, "\n")
+	}
 
-    return nil
+	return nil
 }
 
 func convertStringToTime(s string) int {
