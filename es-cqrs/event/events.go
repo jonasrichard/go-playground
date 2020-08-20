@@ -20,10 +20,16 @@ type SuspendEvent struct {
 	SuspendTime time.Time
 }
 
+type MarketResult struct {
+	MarketID        int
+	WinningOutcomes int
+	LosingOutcomes  []int
+}
+
 type CloseEvent struct {
 	EventID   int
 	CloseTime time.Time
-	// Resulting?
+	Result    []MarketResult
 }
 
 // helper struct for create market

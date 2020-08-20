@@ -15,7 +15,8 @@ type SuspendEventCommand struct {
 }
 
 type CloseEventCommand struct {
-	EventID int
+	EventID           int
+	WinningOutcomeIDs []int
 }
 
 type CreateMarketOutcome struct {

@@ -28,7 +28,7 @@ type Outcome struct {
 type Market struct {
 	ID       int
 	Name     string
-	Outcomes []Outcome
+	Outcomes map[int]Outcome
 }
 
 type Event struct {
@@ -39,7 +39,7 @@ type Event struct {
 	StartTime   time.Time
 	SuspendTime time.Time
 	CloseTime   time.Time
-	Markets     []Market
+	Markets     map[int]Market
 }
 
 var ErrNotFound = errors.New("Event record not found")
@@ -71,25 +71,22 @@ func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 			e.State = PreGame
 
 		case event.StartEvent:
-			// TODO put the validation into the command handler
 			e.StartTime = evt.StartTime
 			e.State = Started
 
 		case event.SuspendEvent:
-			// TODO cannot suspend event if it is not yet started
 			e.SuspendTime = evt.SuspendTime
 			e.State = Suspended
 
 		case event.CloseEvent:
-			// TODO cannot close event if it is not yet started or suspended
 			e.CloseTime = evt.CloseTime
 			e.State = Closed
 
 		case event.CreateMarket:
-			outcomes := []Outcome{}
+			outcomes := make(map[int]Outcome)
 
 			for _, o := range evt.Outcomes {
-				outcomes = append(outcomes, Outcome{ID: o.ID, Name: o.Name, Price: o.StartingPrice})
+				outcomes[o.ID] = Outcome{ID: o.ID, Name: o.Name, Price: o.StartingPrice}
 			}
 
 			market := Market{
@@ -99,10 +96,10 @@ func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 			}
 
 			if e.Markets == nil {
-				e.Markets = []Market{market}
-			} else {
-				e.Markets = append(e.Markets, market)
+				e.Markets = make(map[int]Market)
 			}
+
+			e.Markets[market.ID] = market
 
 		case event.UpdatePrice:
 			// look for outcome id and set the price

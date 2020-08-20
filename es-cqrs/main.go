@@ -27,7 +27,7 @@ func main() {
 	RegisterCmd("create_event", "<event id> <name> <sport>", shell.CreateEvent)
 	RegisterCmd("start_event", "<event id>", shell.StartEvent)
 	RegisterCmd("suspend_event", "<event id>", shell.SuspendEvent)
-	RegisterCmd("close_event", "<event id>", shell.CloseEvent)
+	RegisterCmd("close_event", "<event id> <winning outcome ids>", shell.CloseEvent)
 	RegisterCmd("print_active_events", "List active events", PrintActiveEvents)
 
 	RegisterCmd(

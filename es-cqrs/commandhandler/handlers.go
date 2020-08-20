@@ -71,9 +71,10 @@ func HandleSuspendEventCommand(cmd command.SuspendEventCommand) (event.SuspendEv
 }
 
 func HandleCloseEventCommand(cmd command.CloseEventCommand) (event.CloseEvent, error) {
-	eventAggregate, _ := aggregate.LoadEvent(cmd.EventID)
+	evt, _ := aggregate.LoadEvent(cmd.EventID)
 
-	if eventAggregate.State != aggregate.Closed {
+	if evt.State != aggregate.Closed {
+		// TODO update the markets and outcome which are winning and losing
 		closeEvent := event.CloseEvent{
 			EventID:   cmd.EventID,
 			CloseTime: time.Now(),
