@@ -32,6 +32,22 @@ func HandleCreateEventCommand(cmd command.CreateEventCommand) (event.CreateEvent
 	return createEvent, nil
 }
 
+func HandleUpdateEventCommand(cmd command.UpdateEventCommand) (event.UpdateEvent, error) {
+	_, err := aggregate.LoadEvent(cmd.EventID)
+
+	if err == nil {
+		return event.UpdateEvent{}, ErrEventNotFound
+	}
+
+	updateEvent := event.UpdateEvent{
+		EventID: cmd.EventID,
+		Name:    cmd.Name,
+		Type:    cmd.Type,
+	}
+
+	return updateEvent, nil
+}
+
 func HandleStartEventCommand(cmd command.StartEventCommand) (event.StartEvent, error) {
 	var result event.StartEvent
 

@@ -9,6 +9,12 @@ type CreateEvent struct {
 	Timestamp time.Time
 }
 
+type UpdateEvent struct {
+	EventID int
+	Name    string
+	Type    string
+}
+
 type StartEvent struct {
 	EventID   int
 	StartTime time.Time
@@ -56,6 +62,10 @@ type UpdatePrice struct {
 }
 
 func (e CreateEvent) GetID() int {
+	return e.EventID
+}
+
+func (e UpdateEvent) GetID() int {
 	return e.EventID
 }
 

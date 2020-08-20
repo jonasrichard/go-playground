@@ -6,6 +6,12 @@ type CreateEventCommand struct {
 	Type    string
 }
 
+type UpdateEventCommand struct {
+	EventID int
+	Name    string
+	Type    string
+}
+
 type StartEventCommand struct {
 	EventID int
 }

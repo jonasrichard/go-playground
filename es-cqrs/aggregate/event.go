@@ -70,6 +70,10 @@ func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 			e.Type = evt.Type
 			e.State = PreGame
 
+		case event.UpdateEvent:
+			e.Name = evt.Name
+			e.Type = evt.Type
+
 		case event.StartEvent:
 			e.StartTime = evt.StartTime
 			e.State = Started
