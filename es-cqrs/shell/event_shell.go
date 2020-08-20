@@ -6,6 +6,7 @@ import (
 	"es/store"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/abiosoft/ishell"
 	"github.com/lucasepe/color"
@@ -14,6 +15,10 @@ import (
 var Green = color.New(color.FgGreen).SprintFunc()
 var Yellow = color.New(color.FgYellow).SprintFunc()
 var Red = color.New(color.FgRed).SprintFunc()
+
+func DateFormat(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
+}
 
 func SimpleHandler(command interface{}) {
 	fmt.Printf("[repl] %v\n", command)
@@ -24,9 +29,9 @@ func SimpleHandler(command interface{}) {
 		fmt.Printf("[repl] Event: %v\n", event)
 
 		commandhandler.EventBus(event.(store.SourceableEvent))
+	} else {
+		fmt.Printf("[repl] Error %v\n", err)
 	}
-
-	fmt.Printf("[repl] Error %v\n", err)
 }
 
 func ToID(s string) int {

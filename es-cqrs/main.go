@@ -4,7 +4,6 @@ import (
 	"es/projection"
 	"es/shell"
 	"fmt"
-	"time"
 
 	"github.com/abiosoft/ishell"
 )
@@ -53,7 +52,8 @@ func PrintPrices(c *ishell.Context) {
 	c.Println(shell.Yellow(fmt.Sprintf("%5s %5s %5s %10s %20s", "Event", "Mkt", "Outcome", "Price", "Valid from")))
 
 	for _, p := range projection.ActiveEventPriceView {
-		c.Printf("%5d %5d %5d %10f %20s\n", p.EventID, p.MarketID, p.OutcomeID, p.Price, p.ValidFrom.Format(time.RFC3339))
+		c.Printf("%5d %5d %5d %10.2f %20s\n", p.EventID, p.MarketID, p.OutcomeID, p.Price,
+			shell.DateFormat(p.ValidFrom))
 	}
 }
 
@@ -61,6 +61,6 @@ func PrintActiveEvents(c *ishell.Context) {
 	c.Println(shell.Yellow(fmt.Sprintf("%5s %20s %s", "Event", "Name", "Start time")))
 
 	for _, e := range projection.ActiveEvents {
-		c.Printf("%5d %20s %s\n", e.ID, e.Name, e.StartTime.Format(time.RFC3339))
+		c.Printf("%5d %20s %s\n", e.ID, e.Name, shell.DateFormat(e.StartTime))
 	}
 }

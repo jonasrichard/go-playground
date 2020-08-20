@@ -78,10 +78,12 @@ func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 		case event.SuspendEvent:
 			// TODO cannot suspend event if it is not yet started
 			e.SuspendTime = evt.SuspendTime
+			e.State = Suspended
 
 		case event.CloseEvent:
 			// TODO cannot close event if it is not yet started or suspended
 			e.CloseTime = evt.CloseTime
+			e.State = Closed
 
 		case event.CreateMarket:
 			outcomes := []Outcome{}

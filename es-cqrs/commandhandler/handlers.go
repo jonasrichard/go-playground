@@ -41,7 +41,8 @@ func HandleStartEventCommand(cmd command.StartEventCommand) (event.StartEvent, e
 		return result, err
 	}
 
-	if evt.State == aggregate.PreGame {
+	if evt.State == aggregate.PreGame ||
+		evt.State == aggregate.Suspended {
 		startEvent := event.StartEvent{
 			EventID:   cmd.EventID,
 			StartTime: time.Now(),
