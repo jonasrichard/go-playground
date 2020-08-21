@@ -4,6 +4,7 @@ import (
 	"es/projection"
 	"es/shell"
 	"fmt"
+	"strings"
 
 	"github.com/abiosoft/ishell"
 )
@@ -35,6 +36,7 @@ func main() {
 		"<event id> <market id> <name> [<outcome id> <outcome name> <starting price>]...",
 		shell.CreateMarket,
 	)
+	RegisterCmd("print_allowed_markets", "Print countries the market is allowed", PrintAllowedMarkets)
 
 	RegisterCmd("update_price", "<event id> <market id> <outcome id> <price>", shell.UpdatePrice)
 	RegisterCmd("print_prices", "Print prices of active events", PrintPrices)
@@ -62,5 +64,13 @@ func PrintActiveEvents(c *ishell.Context) {
 
 	for _, e := range projection.ActiveEvents {
 		c.Printf("%5d %20s %s\n", e.ID, e.Name, shell.DateFormat(e.StartTime))
+	}
+}
+
+func PrintAllowedMarkets(c *ishell.Context) {
+	c.Println(shell.Yellow(fmt.Sprintf("%10s %10s %20s %s", "Event", "Market", "Market name", "Countries")))
+
+	for _, e := range projection.MarketCountryView {
+		c.Printf("%10d %10d %20s %s\n", e.EventID, e.MarketID, e.MarketName, strings.Join(e.Countries, ","))
 	}
 }
