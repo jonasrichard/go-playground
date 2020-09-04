@@ -64,29 +64,29 @@ func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 		fmt.Printf(" Applying %T %v\n", evt, evt)
 
 		switch evt := evt.(type) {
-		case event.CreateEvent:
+		case event.EventCreated:
 			e.ID = evt.EventID
 			e.Name = evt.Name
 			e.Type = evt.Type
 			e.State = PreGame
 
-		case event.UpdateEvent:
+		case event.EventUpdated:
 			e.Name = evt.Name
 			e.Type = evt.Type
 
-		case event.StartEvent:
+		case event.EventStarted:
 			e.StartTime = evt.StartTime
 			e.State = Started
 
-		case event.SuspendEvent:
+		case event.EventSuspended:
 			e.SuspendTime = evt.SuspendTime
 			e.State = Suspended
 
-		case event.CloseEvent:
+		case event.EventClosed:
 			e.CloseTime = evt.CloseTime
 			e.State = Closed
 
-		case event.CreateMarket:
+		case event.MarketCreated:
 			outcomes := make(map[int]Outcome)
 
 			for _, o := range evt.Outcomes {
@@ -105,7 +105,7 @@ func (e *Event) ApplyEvents(events []store.SourceableEvent) {
 
 			e.Markets[market.ID] = market
 
-		case event.UpdatePrice:
+		case event.PriceUpdated:
 			// look for outcome id and set the price
 		}
 	}

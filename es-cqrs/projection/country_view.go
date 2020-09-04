@@ -16,7 +16,7 @@ var MarketCountryView map[int]MarketCountry = make(map[int]MarketCountry)
 
 func ProjectMarketCountryView(evt store.SourceableEvent) {
 	switch e := evt.(type) {
-	case event.CreateMarket:
+	case event.MarketCreated:
 		countries := allowedCountries(e.Name)
 
 		MarketCountryView[e.MarketID] = MarketCountry{

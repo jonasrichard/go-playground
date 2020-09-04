@@ -11,8 +11,8 @@ import (
 
 func TestActivePrices(t *testing.T) {
 	events := []store.SourceableEvent{
-		event.CreateEvent{EventID: 9, Name: "Man-Ars"},
-		event.CreateMarket{EventID: 9, MarketID: 10, Name: "Win-Draw-Win", Outcomes: []event.CreateMarketOutcome{
+		event.EventCreated{EventID: 9, Name: "Man-Ars"},
+		event.MarketCreated{EventID: 9, MarketID: 10, Name: "Win-Draw-Win", Outcomes: []event.CreateMarketOutcome{
 			{ID: 11, Name: "Home team", StartingPrice: 6.5},
 			{ID: 12, Name: "Draw", StartingPrice: 3.4},
 			{ID: 13, Name: "Away team", StartingPrice: 2.1},

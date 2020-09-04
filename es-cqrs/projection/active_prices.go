@@ -20,7 +20,7 @@ var ActiveEventPriceView map[int]ActivePrice = make(map[int]ActivePrice)
 
 func ProjectActiveEventPrice(evt store.SourceableEvent) error {
 	switch e := evt.(type) {
-	case event.CreateMarket:
+	case event.MarketCreated:
 		for _, outcome := range e.Outcomes {
 			price, ok := ActiveEventPriceView[outcome.ID]
 			if !ok {
@@ -38,7 +38,7 @@ func ProjectActiveEventPrice(evt store.SourceableEvent) error {
 			ActiveEventPriceView[outcome.ID] = price
 		}
 
-	case event.UpdatePrice:
+	case event.PriceUpdated:
 		price, ok := ActiveEventPriceView[e.OutcomeID]
 		if !ok {
 			price = ActivePrice{
@@ -54,5 +54,6 @@ func ProjectActiveEventPrice(evt store.SourceableEvent) error {
 
 		ActiveEventPriceView[e.OutcomeID] = price
 	}
+
 	return nil
 }

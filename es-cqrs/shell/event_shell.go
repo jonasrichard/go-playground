@@ -3,7 +3,6 @@ package shell
 import (
 	"es/command"
 	"es/commandhandler"
-	"es/store"
 	"fmt"
 	"strconv"
 	"time"
@@ -23,12 +22,14 @@ func DateFormat(t time.Time) string {
 func SimpleHandler(command interface{}) {
 	fmt.Printf("[repl] %v\n", command)
 
-	event, err := commandhandler.Handle(command)
+	events, err := commandhandler.Handle(command)
 
 	if err == nil {
-		fmt.Printf("[repl] Event: %v\n", event)
+		for _, event := range events {
+			fmt.Printf("[repl] Event: %v\n", event)
 
-		commandhandler.EventBus(event.(store.SourceableEvent))
+			commandhandler.EventBus(event)
+		}
 	} else {
 		fmt.Printf("[repl] Error %v\n", err)
 	}

@@ -9,17 +9,19 @@ import (
 
 var ErrUnknownCommand = errors.New("unknown command")
 
-func Handle(cmd interface{}) (interface{}, error) {
-	event, err := ExecuteCommand(cmd)
+func Handle(cmd interface{}) ([]store.SourceableEvent, error) {
+	events, err := ExecuteCommand(cmd)
 
 	if err == nil {
-		store.Store(event.(store.SourceableEvent))
+		for _, evt := range events {
+			store.Store(evt)
+		}
 	}
 
-	return event, err
+	return events, err
 }
 
-func ExecuteCommand(c interface{}) (store.SourceableEvent, error) {
+func ExecuteCommand(c interface{}) ([]store.SourceableEvent, error) {
 	switch cmd := c.(type) {
 	case command.CreateEventCommand:
 		return HandleCreateEventCommand(cmd)
@@ -33,6 +35,8 @@ func ExecuteCommand(c interface{}) (store.SourceableEvent, error) {
 		return HandleCreateMarketCommand(cmd)
 	case command.UpdatePriceCommand:
 		return HandleUpdatePriceCommand(cmd)
+	case command.CreateFootballEventCommand:
+		return HandleCreateFootballEventCommand(cmd)
 	}
 
 	return nil, ErrUnknownCommand

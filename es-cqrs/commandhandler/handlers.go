@@ -5,6 +5,7 @@ import (
 	"es/aggregate"
 	"es/command"
 	"es/event"
+	"es/store"
 	"time"
 )
 
@@ -15,94 +16,92 @@ var ErrEventAlreadyClosed = errors.New("event cannot be closed")
 var ErrEventNotFound = errors.New("event not found")
 var ErrCannotChangePrice = errors.New("cannot change price")
 
-func HandleCreateEventCommand(cmd command.CreateEventCommand) (event.CreateEvent, error) {
+func HandleCreateEventCommand(cmd command.CreateEventCommand) ([]store.SourceableEvent, error) {
 	_, err := aggregate.LoadEvent(cmd.EventID)
 
 	if err == nil {
-		return event.CreateEvent{}, ErrEventAlreadyCreated
+		return nil, ErrEventAlreadyCreated
 	}
 
-	createEvent := event.CreateEvent{
+	createEvent := event.EventCreated{
 		EventID:   cmd.EventID,
 		Name:      cmd.Name,
 		Type:      cmd.Type,
 		Timestamp: time.Now(),
 	}
 
-	return createEvent, nil
+	return []store.SourceableEvent{createEvent}, nil
 }
 
-func HandleUpdateEventCommand(cmd command.UpdateEventCommand) (event.UpdateEvent, error) {
+func HandleUpdateEventCommand(cmd command.UpdateEventCommand) ([]store.SourceableEvent, error) {
 	_, err := aggregate.LoadEvent(cmd.EventID)
 
 	if err == nil {
-		return event.UpdateEvent{}, ErrEventNotFound
+		return nil, ErrEventNotFound
 	}
 
-	updateEvent := event.UpdateEvent{
+	updateEvent := event.EventUpdated{
 		EventID: cmd.EventID,
 		Name:    cmd.Name,
 		Type:    cmd.Type,
 	}
 
-	return updateEvent, nil
+	return []store.SourceableEvent{updateEvent}, nil
 }
 
-func HandleStartEventCommand(cmd command.StartEventCommand) (event.StartEvent, error) {
-	var result event.StartEvent
-
+func HandleStartEventCommand(cmd command.StartEventCommand) ([]store.SourceableEvent, error) {
 	evt, err := aggregate.LoadEvent(cmd.EventID)
 
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	if evt.State == aggregate.PreGame ||
 		evt.State == aggregate.Suspended {
-		startEvent := event.StartEvent{
+		startEvent := event.EventStarted{
 			EventID:   cmd.EventID,
 			StartTime: time.Now(),
 			Name:      evt.Name,
 		}
 
-		return startEvent, nil
+		return []store.SourceableEvent{startEvent}, nil
 	}
 
-	return result, ErrEventAlreadyStarted
+	return nil, ErrEventAlreadyStarted
 }
 
-func HandleSuspendEventCommand(cmd command.SuspendEventCommand) (event.SuspendEvent, error) {
+func HandleSuspendEventCommand(cmd command.SuspendEventCommand) ([]store.SourceableEvent, error) {
 	eventAggregate, _ := aggregate.LoadEvent(cmd.EventID)
 
 	if eventAggregate.State == aggregate.Started {
-		suspendEvent := event.SuspendEvent{
+		suspendEvent := event.EventSuspended{
 			EventID:     cmd.EventID,
 			SuspendTime: time.Now(),
 		}
 
-		return suspendEvent, nil
+		return []store.SourceableEvent{suspendEvent}, nil
 	}
 
-	return event.SuspendEvent{}, ErrEventAlreadySuspended
+	return nil, ErrEventAlreadySuspended
 }
 
-func HandleCloseEventCommand(cmd command.CloseEventCommand) (event.CloseEvent, error) {
+func HandleCloseEventCommand(cmd command.CloseEventCommand) ([]store.SourceableEvent, error) {
 	evt, _ := aggregate.LoadEvent(cmd.EventID)
 
 	if evt.State != aggregate.Closed {
 		// TODO update the markets and outcome which are winning and losing
-		closeEvent := event.CloseEvent{
+		closeEvent := event.EventClosed{
 			EventID:   cmd.EventID,
 			CloseTime: time.Now(),
 		}
 
-		return closeEvent, nil
+		return []store.SourceableEvent{closeEvent}, nil
 	}
 
-	return event.CloseEvent{}, ErrEventAlreadyClosed
+	return nil, ErrEventAlreadyClosed
 }
 
-func HandleCreateMarketCommand(cmd command.CreateMarketCommand) (event.CreateMarket, error) {
+func HandleCreateMarketCommand(cmd command.CreateMarketCommand) ([]store.SourceableEvent, error) {
 	_, err := aggregate.LoadEvent(cmd.EventID)
 
 	if err == nil {
@@ -118,7 +117,7 @@ func HandleCreateMarketCommand(cmd command.CreateMarketCommand) (event.CreateMar
 			outcomes = append(outcomes, outcome)
 		}
 
-		createMarket := event.CreateMarket{
+		createMarket := event.MarketCreated{
 			EventID:   cmd.EventID,
 			MarketID:  cmd.MarketID,
 			Name:      cmd.Name,
@@ -126,17 +125,17 @@ func HandleCreateMarketCommand(cmd command.CreateMarketCommand) (event.CreateMar
 			Timestamp: time.Now(),
 		}
 
-		return createMarket, nil
+		return []store.SourceableEvent{createMarket}, nil
 	}
 
-	return event.CreateMarket{}, ErrEventNotFound
+	return nil, ErrEventNotFound
 }
 
-func HandleUpdatePriceCommand(cmd command.UpdatePriceCommand) (event.UpdatePrice, error) {
+func HandleUpdatePriceCommand(cmd command.UpdatePriceCommand) ([]store.SourceableEvent, error) {
 	evt, _ := aggregate.LoadEvent(cmd.EventID)
 
 	if evt.State != aggregate.Closed {
-		updatePrice := event.UpdatePrice{
+		updatePrice := event.PriceUpdated{
 			EventID:   cmd.EventID,
 			MarketID:  cmd.MarketID,
 			OutcomeID: cmd.OutcomeID,
@@ -144,8 +143,8 @@ func HandleUpdatePriceCommand(cmd command.UpdatePriceCommand) (event.UpdatePrice
 			Timestamp: time.Now(),
 		}
 
-		return updatePrice, nil
+		return []store.SourceableEvent{updatePrice}, nil
 	}
 
-	return event.UpdatePrice{}, ErrCannotChangePrice
+	return nil, ErrCannotChangePrice
 }

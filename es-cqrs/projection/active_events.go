@@ -16,7 +16,7 @@ var ActiveEvents map[int]ActiveEvent = make(map[int]ActiveEvent)
 
 func ProjectActiveEvents(evt store.SourceableEvent) error {
 	switch e := evt.(type) {
-	case event.StartEvent:
+	case event.EventStarted:
 		ae := ActiveEvent{
 			ID:        e.EventID,
 			Name:      e.Name,
@@ -24,9 +24,9 @@ func ProjectActiveEvents(evt store.SourceableEvent) error {
 		}
 
 		ActiveEvents[ae.ID] = ae
-	case event.SuspendEvent:
+	case event.EventSuspended:
 		delete(ActiveEvents, e.EventID)
-	case event.CloseEvent:
+	case event.EventClosed:
 		delete(ActiveEvents, e.EventID)
 	}
 

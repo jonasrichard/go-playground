@@ -2,26 +2,28 @@ package event
 
 import "time"
 
-type CreateEvent struct {
+// TODO rename event to competition
+
+type EventCreated struct {
 	EventID   int
 	Name      string
 	Type      string
 	Timestamp time.Time
 }
 
-type UpdateEvent struct {
+type EventUpdated struct {
 	EventID int
 	Name    string
 	Type    string
 }
 
-type StartEvent struct {
+type EventStarted struct {
 	EventID   int
 	StartTime time.Time
 	Name      string
 }
 
-type SuspendEvent struct {
+type EventSuspended struct {
 	EventID     int
 	SuspendTime time.Time
 }
@@ -32,7 +34,7 @@ type MarketResult struct {
 	LosingOutcomes  []int
 }
 
-type CloseEvent struct {
+type EventClosed struct {
 	EventID   int
 	CloseTime time.Time
 	Result    []MarketResult
@@ -45,7 +47,7 @@ type CreateMarketOutcome struct {
 	StartingPrice float64
 }
 
-type CreateMarket struct {
+type MarketCreated struct {
 	EventID   int
 	MarketID  int
 	Name      string
@@ -53,7 +55,7 @@ type CreateMarket struct {
 	Timestamp time.Time
 }
 
-type UpdatePrice struct {
+type PriceUpdated struct {
 	EventID   int
 	MarketID  int
 	OutcomeID int
@@ -61,30 +63,30 @@ type UpdatePrice struct {
 	Timestamp time.Time
 }
 
-func (e CreateEvent) GetID() int {
+func (e EventCreated) GetID() int {
 	return e.EventID
 }
 
-func (e UpdateEvent) GetID() int {
+func (e EventUpdated) GetID() int {
 	return e.EventID
 }
 
-func (e StartEvent) GetID() int {
+func (e EventStarted) GetID() int {
 	return e.EventID
 }
 
-func (e SuspendEvent) GetID() int {
+func (e EventSuspended) GetID() int {
 	return e.EventID
 }
 
-func (e CloseEvent) GetID() int {
+func (e EventClosed) GetID() int {
 	return e.EventID
 }
 
-func (e CreateMarket) GetID() int {
+func (e MarketCreated) GetID() int {
 	return e.EventID
 }
 
-func (e UpdatePrice) GetID() int {
+func (e PriceUpdated) GetID() int {
 	return e.EventID
 }
