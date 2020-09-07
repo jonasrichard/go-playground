@@ -24,10 +24,11 @@ func HandleCreateEventCommand(cmd command.CreateEventCommand) ([]store.Sourceabl
 	}
 
 	createEvent := event.EventCreated{
-		EventID:   cmd.EventID,
-		Name:      cmd.Name,
-		Type:      cmd.Type,
-		Timestamp: time.Now(),
+		EventID:          cmd.EventID,
+		Name:             cmd.Name,
+		Type:             cmd.Type,
+		PlannedStartTime: time.Now().Add(15 * time.Second),
+		Timestamp:        time.Now(),
 	}
 
 	return []store.SourceableEvent{createEvent}, nil

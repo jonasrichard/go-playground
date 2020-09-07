@@ -41,6 +41,8 @@ func main() {
 	RegisterCmd("update_price", "<event id> <market id> <outcome id> <price>", shell.UpdatePrice)
 	RegisterCmd("print_prices", "Print prices of active events", PrintPrices)
 
+	projection.InitProjections()
+
 	sh.Process("create_event", "1", "Man-Ars", "soccer")
 	sh.Process("create_market", "1", "1", "Win-Draw-Win",
 		"1", "Home team", "1.4",

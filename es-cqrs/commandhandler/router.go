@@ -47,6 +47,7 @@ func EventBus(event store.SourceableEvent) error {
 	projection.ProjectActiveEventPrice(event)
 	projection.ProjectActiveEvents(event)
 	projection.ProjectMarketCountryView(event)
+	projection.ProjectStartedEvents(event)
 
 	return nil
 }

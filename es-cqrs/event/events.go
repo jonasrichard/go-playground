@@ -5,10 +5,11 @@ import "time"
 // TODO rename event to competition
 
 type EventCreated struct {
-	EventID   int
-	Name      string
-	Type      string
-	Timestamp time.Time
+	EventID          int
+	Name             string
+	Type             string
+	PlannedStartTime time.Time
+	Timestamp        time.Time
 }
 
 type EventUpdated struct {
