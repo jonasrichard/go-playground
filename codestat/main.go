@@ -143,6 +143,8 @@ func extensions() map[string]string {
 	}{
 		{"C", []string{".c", ".cc", ".h"}},
 		{"Config", []string{".conf", ".yml", ".yaml"}},
+		{"Elixir", []string{".ex", ".exs"}},
+		{"Erlang", []string{".erl", ".hrl"}},
 		{"Go", []string{".go"}},
 		{"HTML", []string{".html", ".css"}},
 		{"Javascript", []string{".js"}},
