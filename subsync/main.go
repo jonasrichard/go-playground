@@ -19,13 +19,76 @@ type SubtitleItem struct {
 	Number int
 	From   string
 	To     string
+	FromMS int
+	ToMS   int
 	Lines  []string
+}
+
+func main() {
+	input := flag.String("i", "", ".srt input file")
+	flag.Parse()
+
+	subtitles, err := ReadSrtFile(*input)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	avg := 0
+	n := 0
+
+	for i := range subtitles {
+		item := subtitles[i]
+
+		delta := item.ToMS - item.FromMS
+		avg += delta
+		n++
+
+		if delta < 1500 {
+			fmt.Printf("%v %dms\n", item, delta)
+
+			before := item.FromMS
+			if i > 0 {
+				before = subtitles[i-1].ToMS
+			}
+
+			after := item.ToMS
+			if i < len(subtitles)-1 {
+				after = subtitles[i+1].FromMS
+			}
+
+			fmt.Printf("%d %d\n", item.FromMS-before, after-item.ToMS)
+
+			// We need to add this ms before and after the timeframe
+			plus := (1500 - delta) / 2
+
+			if plus > item.FromMS-before {
+				subtitles[i].FromMS = before + 1
+			} else {
+				subtitles[i].FromMS -= plus
+			}
+
+			if plus > after-item.ToMS {
+				subtitles[i].ToMS = after - 1
+			} else {
+				subtitles[i].ToMS += plus
+			}
+
+			subtitles[i].From = convertTimeToString(subtitles[i].FromMS)
+			subtitles[i].To = convertTimeToString(subtitles[i].ToMS)
+
+			fmt.Printf("%v\n", subtitles[i])
+		}
+	}
+
+	fmt.Printf("%vms\n", avg/n)
+
+	WriteSrtFile(subtitles, "out.srt")
 }
 
 // TODO check if any time will be negative
 // TODO support simple delay mode like -d 1500ms -d 1,5s
 
-func main() {
+func main2() {
 	input := flag.String("i", "", ".srt input file")
 	time1 := flag.String("t1", "", "simple delay in from->to format")
 	time2 := flag.String("t2", "", "interpolated delay in from->to format")
@@ -97,8 +160,11 @@ func ReadSrtFile(name string) ([]SubtitleItem, error) {
 			if line != "" {
 				item.Lines = append(item.Lines, line)
 			} else {
+				item.FromMS = convertStringToTime(item.From)
+				item.ToMS = convertStringToTime(item.To)
+
 				subtitles = append(subtitles, item)
-				fmt.Println(item)
+				// fmt.Println(item)
 				item = SubtitleItem{Lines: []string{}}
 				step = 0
 			}
