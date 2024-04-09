@@ -116,7 +116,9 @@ func convertTimeToString(t int) string {
 	return fmt.Sprintf("%02d:%02d:%02d,%03d", t, minute, second, milli)
 }
 
-func parseFromToOpt(ftOpt string) int {
+// parseFromToOpt converts hh:mm:ss,msc->hh:mm:ss,msc into two ints representing
+// the millis of the two times
+func parseFromToOpt(ftOpt string) (int, int) {
 	p := strings.Index(ftOpt, "->")
 
 	if p == -1 {
@@ -128,5 +130,5 @@ func parseFromToOpt(ftOpt string) int {
 	from := ftOpt[:p]
 	to := ftOpt[p+2:]
 
-	return convertStringToTime(to) - convertStringToTime(from)
+	return convertStringToTime(from), convertStringToTime(to)
 }

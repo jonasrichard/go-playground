@@ -13,10 +13,22 @@ func LinearMode(opts GlobalOpts) {
         os.Exit(1)
 	}
 
-	diff1 := parseFromToOpt(opts.Linear.StartTime)
-    // diff2 := parseFromToOpt(t2)
+	from1, to1 := parseFromToOpt(opts.Linear.StartTime)
+    from2, to2 := parseFromToOpt(opts.Linear.EndTime)
 
-    // TODO diff2-diff1 but checking the times
+    // https://en.wikipedia.org/wiki/Linear_interpolation
+    //
+    //      to - to1           to2 - to1
+    //    -------------  =  ---------------
+    //     from - from1      from2 - from1
+    //
+    //  so
+    //
+    //                                  to2 - to1
+    //   to = to1 + (from - from1) * --------------
+    //                                from2 - from1
+
+    coeff := float64(to2 - to1) / float64(from2 - from1)
 
 	for i := range subtitles {
 		newFrom := convertTimeToString(convertStringToTime(subtitles[i].From) + diff1)

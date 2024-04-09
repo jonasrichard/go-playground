@@ -6,7 +6,9 @@ import (
 )
 
 func DelayMode(opts GlobalOpts) {
-	diff := parseFromToOpt(opts.Delay.Time)
+	from, to := parseFromToOpt(opts.Delay.Time)
+
+    diff := to - from
 
 	subtitles, err := ReadSrtFile(opts.Input)
 	if err != nil {
