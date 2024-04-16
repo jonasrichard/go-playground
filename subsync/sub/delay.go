@@ -17,13 +17,7 @@ func DelayMode(opts GlobalOpts) {
         os.Exit(1)
 	}
 
-	for i := range subtitles {
-		newFrom := convertTimeToString(convertStringToTime(subtitles[i].From) + diff)
-		newTo := convertTimeToString(convertStringToTime(subtitles[i].To) + diff)
-
-		subtitles[i].From = newFrom
-		subtitles[i].To = newTo
-	}
+    delaySubtitles(subtitles, diff)
 
 	err = WriteSrtFile(subtitles, opts.Output)
 
@@ -31,5 +25,11 @@ func DelayMode(opts GlobalOpts) {
 		fmt.Println(err)
 
 		os.Exit(1)
+	}
+}
+
+func delaySubtitles(subtitles []SubtitleItem, diff int) {
+	for i := range subtitles {
+        (&subtitles[i]).Delay(diff)
 	}
 }

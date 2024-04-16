@@ -1,7 +1,6 @@
 package sub
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/jessevdk/go-flags"
@@ -27,10 +26,12 @@ type LinearOpts struct {
 func Parse() GlobalOpts {
 	var globalOpts GlobalOpts
 
-	_, err := flags.Parse(&globalOpts)
+    parser := flags.NewParser(&globalOpts, flags.Default)
+
+    _, err := parser.Parse()
 
 	if err != nil {
-		fmt.Printf("Error parsing options: %v\n", err)
+        parser.WriteHelp(os.Stdout)
 
 		os.Exit(1)
 	}

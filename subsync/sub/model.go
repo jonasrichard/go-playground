@@ -23,6 +23,25 @@ type SubtitleItem struct {
 	Lines  []string
 }
 
+// Delay a subtitle item in place
+func (si *SubtitleItem) Delay(diff int) {
+    si.FromMS += diff
+    si.ToMS += diff
+
+    si.From = convertTimeToString(si.FromMS)
+    si.To = convertTimeToString(si.ToMS)
+}
+
+func (si *SubtitleItem) SetFromMS(f int) {
+    si.FromMS = f
+    si.From = convertTimeToString(si.FromMS)
+}
+
+func (si *SubtitleItem) SetToMS(f int) {
+    si.ToMS = f
+    si.To = convertTimeToString(si.ToMS)
+}
+
 func ReadSrtFile(name string) ([]SubtitleItem, error) {
 	file, err := os.Open(name)
 	if err != nil {
